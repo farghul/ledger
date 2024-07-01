@@ -1,0 +1,42 @@
+---
+- name: Create a list of user/sites
+  hosts: "{{ node }}"
+  vars_files: defaults/main.yaml
+  gather_facts: false
+  ignore_errors: true
+  tasks:
+    - name: Build a complete list of users and their WordPress accounts
+      tags: compile
+      block:
+        - name: Compile the user data
+          ansible.builtin.script:
+            cmd: "{{ GIT }}accounts.rb {{ root }} {{ path }}"
+
+        - name: Download the compendium.csv file
+          ansible.builtin.fetch:
+            src: results/compendium.csv
+            dest: "{{ GIT }}results/"
+            flat: true
+
+    - name: Record a list of obsolete users from WordPress
+      tags: mark
+      block:
+        - name: Mark designated users
+          ansible.builtin.script:
+            cmd: "{{ GIT }}mark.rb {{ root }} {{ path }}"
+
+        - name: Download the candidates for deletion file
+          ansible.builtin.fetch:
+            src: "{{ item }}"
+            dest: "{{ GIT }}results/"
+            flat: true
+          loop:
+            - sources/candidates.csv
+            - sources/candidates.txt
+
+    - name: Write message to logging
+      ansible.builtin.lineinfile:
+        path: logs/ansible.log
+        line: "{{ now(true) }} - User files successfully created."
+        create: true
+...
