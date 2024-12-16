@@ -35,7 +35,7 @@ Variables declared in a defaults/main.yaml file:
 
 Navigate to the folder containing your *accounts.yaml* file and (dependent on the location of your inventory file) run:
 
-``` console
+``` zsh
 ansible-playbook -i ~/inventory.yaml accounts.yaml --extra-vars "node=[server_name] path={{ PRODPATH }} root={{ PROD }}"
 ```
 
